@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appel Zoom</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #f7f7f9; color: #2d2d2d; }
+  main { text-align: center; padding: 2rem; }
+  .num { font-size: 1.6rem; font-weight: 600; margin: .5rem 0 1.5rem; }
+  a.btn { display: inline-block; padding: .8rem 1.4rem; border-radius: .5rem; background: #0b5cff; color: #fff; text-decoration: none; font-weight: 600; }
+  a.alt { display: block; margin-top: 1rem; color: #555; font-size: .9rem; }
+  .err { color: #a9252b; }
+</style>
+</head>
+<body>
+<main>
+  <div id="etat">Ouverture de Zoom…</div>
+  <div class="num" id="num"></div>
+  <a class="btn" id="zoom" href="#">Appeler avec Zoom</a>
+  <a class="alt" id="tel" href="#">Autre application (tel:)</a>
+</main>
+<script>
+  var brut = new URLSearchParams(location.search).get("n") || "";
+  var n = brut.replace(/[^0-9+]/g, "");
+  if (/^0[1-9][0-9]{8}$/.test(n)) n = "+33" + n.slice(1);
+  if (/^33[1-9][0-9]{8}$/.test(n)) n = "+" + n;
+  var ok = /^\+[1-9][0-9]{7,14}$/.test(n);
+  var etat = document.getElementById("etat");
+  if (!ok) {
+    etat.textContent = "Numéro invalide : " + brut;
+    etat.className = "err";
+    document.getElementById("zoom").style.display = "none";
+    document.getElementById("tel").style.display = "none";
+  } else {
+    var lisible = n.replace(/^\+33(\d)(\d{2})(\d{2})(\d{2})(\d{2})$/, "+33 $1 $2 $3 $4 $5");
+    document.title = "Appel " + lisible;
+    document.getElementById("num").textContent = lisible;
+    var zoom = "zoomphonecall://" + n;
+    document.getElementById("zoom").href = zoom;
+    document.getElementById("tel").href = "tel:" + n;
+    var parti = false;
+    function fermer() { if (!parti) { parti = true; setTimeout(function () { window.close(); }, 800); } }
+    window.addEventListener("blur", fermer);
+    document.addEventListener("visibilitychange", function () { if (document.hidden) fermer(); });
+    location.href = zoom;
+  }
+</script>
+</body>
+</html>
